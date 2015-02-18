@@ -11,7 +11,7 @@ bool parse_message(struct MESSAGE *message, char *in) {
 		if(occ >= 4) {// Parfois y'a pas d'args
 			message->args = split[3];
 		} else if(occ >= 3) {
-			message->args = NULL;
+			message->args = (char *)calloc(1, 1);
 		} else {
 			free(split);
 			return false;
@@ -43,7 +43,5 @@ void clear_message(struct MESSAGE message) {
 	free(message.fullsource);
 	free(message.type);
 	free(message.target);
-	if(message.args != NULL) {
-		free(message.args);
-	}
+	free(message.args);
 }
