@@ -24,6 +24,17 @@ bool my_mysql_query(MYSQL *mysql, struct CONFIG config, char *query, char **res)
 	}
 
 	if(mysql_query(mysql, query) != 0) {
+		const char *error;
+		char *tpl, *buf;
+		
+		error = mysql_error(mysql);
+		if(error[0]) {
+			tpl = "WARN: MySQL error: %s";
+			buf = (char *)malloc(strlen(tpl) + strlen(error) - 1);
+			sprintf(buf, tpl, error);
+			logger(config.logsystem, buf);
+			free(buf);
+		}
 		return false;
 	}
 
