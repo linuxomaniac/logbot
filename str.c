@@ -114,20 +114,20 @@ bool strstartswith(char *str, char *check) {
 	}
 }
 
-unsigned int strcasecmp(char *a, char *b) {
+bool strcasecmp(char *a, char *b) {
 	unsigned int i, len = strlen(a);
 
 	if(len != strlen(b)) {
-		return 1;
+		return false;
 	}
 
 	for(i = 0; i < len; i++) {
 		if(lower(a[i]) != lower(b[i])) {
-			return i;
+			return false;
 		}
 	}
 
-	return 0;
+	return true;
 }
 
 char *strdup(char *a) {

@@ -5,6 +5,10 @@ void logger(char *filename, char *in) {
 	struct tm *info;
 	int t;
 
+	if(filename == NULL) {// Log désactivé
+		return;
+	}
+
 	f = fopen(filename, "ab");
 	if(f == NULL) {
 		printf("FATAL: could not open %s!\n", filename);

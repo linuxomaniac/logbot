@@ -32,14 +32,14 @@ unsigned char parse_config(struct CONFIG *config, char *a, char *b) {
 			return 1;
 		}
 	} else if(strcmp(a, "LogChat") == 0) {
-		if(strcasecmp(b, "none") != 0) {// LogXXX=None -> désactivé
+		if(!strcasecmp(b, "none")) {// LogXXX=None -> désactivé
 			config->logchat = (char *)malloc(len_b + 1);
 			memcpy(config->logchat, b, len_b + 1);
 		} else {
 			config->logchat = NULL;
 		}
 	}  else if(strcmp(a, "LogSystem") == 0) {
-		if(strcasecmp(b, "none") != 0) {// LogXXX=None -> désactivé
+		if(!strcasecmp(b, "none")) {// LogXXX=None -> désactivé
 			config->logsystem = (char *)malloc(len_b + 1);
 			memcpy(config->logsystem, b, len_b + 1);
 		} else {
@@ -55,7 +55,7 @@ unsigned char parse_config(struct CONFIG *config, char *a, char *b) {
 		config->password = (char *)malloc(len_b + 1);
 		memcpy(config->password, b, len_b + 1);
 	} else if(strcmp(a, "MysqlHost") == 0) {
-		if(strcasecmp(b, "none") != 0) {// None -> désactivé
+		if(!strcasecmp(b, "none")) {// None -> désactivé
 			config->mysqlhost = (char *)malloc(len_b + 1);
 			memcpy(config->mysqlhost, b, len_b + 1);
 		} else {

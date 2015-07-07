@@ -39,6 +39,8 @@ void *dcc_send_thread(void *rawargs) {
 	unsigned int len;
 	pthread_t alert_thread;
 
+	logger(args->config.logsystem, "INFO: into the DCC thread!");
+
 	if((master_sock = socket(AF_INET , SOCK_STREAM , 0)) < 0)
 	{
 		logger(args->config.logsystem, "WARN: DCC socket failed!");
@@ -65,6 +67,7 @@ void *dcc_send_thread(void *rawargs) {
 	while(!ready) {
 		if(bind(master_sock,(struct sockaddr *)&server , sizeof(server)) < 0) {
 			if(errno == EADDRINUSE) {// Port in use
+				logger(args->config.logsystem, "INFO: DCC socket still not ready!");
 				sleep(5);
 			} else {
 				logger(args->config.logsystem, "WARN: DCC bind failed!");
@@ -85,6 +88,7 @@ void *dcc_send_thread(void *rawargs) {
 	}
 
 	addrlen = sizeof(struct sockaddr_in);
+	logger(args->config.logsystem, "INFO: awaiting a DCC connection...");
 	client_sock = accept(master_sock, (struct sockaddr *)&client, &addrlen);
 
 	pthread_join(alert_thread, NULL);// On n'a plus besoin de l'autre thread, on l'attend
@@ -92,6 +96,7 @@ void *dcc_send_thread(void *rawargs) {
 
 	if(client_sock < 0) {
 		if(errno == 11) {// Connexion pas acceptée dans le temps imparti
+			logger(args->config.logsystem, "INFO: DCC connection timeout.");
 			tpl = "PRIVMSG %s :La connexion DCC n'a pas été acceptée à temps ! Envoi des derniers logs annulé !\r\n";
 			len = strlen(tpl) + strlen(args->source) - 2;
 			buf = (char *)malloc(len + 1);
@@ -112,6 +117,7 @@ void *dcc_send_thread(void *rawargs) {
 		}
 	}
 
+	logger(args->config.logsystem, "INFO: sending DCC messages.");
 	tpl = "Voici les messages qui ont été diffusés pendant ton absence :\n";
 	send(client_sock, tpl, strlen(tpl), 0);
 	send(client_sock, args->data, strlen(args->data), 0);

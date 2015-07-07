@@ -61,7 +61,7 @@ bool process_message(int sock, struct CONFIG *config, MYSQL *mysql, struct MESSA
 	bool t;
 
 	if(strcmp(message->type, "PRIVMSG") == 0) {
-		if(strcasecmp(config->channel, message->target) == 0) {
+		if(strcasecmp(config->channel, message->target)) {
 			if(strstartswith(message->args, "\001ACTION")) {
 				tmp = strsplit(message->args, ' ');
 				len = strlen(tmp) - 1;
@@ -80,7 +80,7 @@ bool process_message(int sock, struct CONFIG *config, MYSQL *mysql, struct MESSA
 				logger(config->logchat, buf);
 				free(buf);
 			}
-		} else if(strcasecmp(config->nick, message->target) == 0) {// Message privé
+		} else if(strcasecmp(config->nick, message->target)) {// Message privé
 			if(message->args[0] == '\001') {
 				if(strcmp(message->args, "\001VERSION\001") == 0) {
 					tpl = "NOTICE %s :\001VERSION LogBot : un bot de logs qui te baise. Programmé en C avec la teub. version LARGEMENT AU-DELÀ DES 9000 !\001\r\n";
@@ -174,7 +174,7 @@ bool process_message(int sock, struct CONFIG *config, MYSQL *mysql, struct MESSA
 			}
 		}
 	} else if(strcmp(message->type, "JOIN") == 0) {// Plus de vingt par jour !
-		if(strcasecmp(message->source, config->nick) == 0) {// C'est nous qui venons de nous connecter
+		if(strcasecmp(message->source, config->nick)) {// C'est nous qui venons de nous connecter
 			return true;
 		}
 
@@ -215,9 +215,10 @@ bool process_message(int sock, struct CONFIG *config, MYSQL *mysql, struct MESSA
 					thread_args->data = buf;
 					pthread_attr_init(&thread_attr);
 					pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);// Évite quelques erreurs Valgrind
+					logger(config->logsystem, "INFO: creating the thread to send the logs.");
 
 					if(pthread_create(&dcc_thread, &thread_attr, dcc_send_thread, thread_args) != 0) {
-						perror("DCC thread:");
+						logger(config->logsystem, "WARN: unable to create thread!");
 					}
 
 					// On free pas buf, ce sera fait dans le thread
@@ -272,7 +273,7 @@ bool process_message(int sock, struct CONFIG *config, MYSQL *mysql, struct MESSA
 		tmp = strsplit(message->args, ' ');
 		strlstrip(tmp);
 
-		t = (strcasecmp(message->args, config->nick) == 0);// On vérifie que c'est pas nous
+		t = strcasecmp(message->args, config->nick);// On vérifie que c'est pas nous
 
 		if(!t && config->mysqlhost != NULL) {// Un utilisateur s'est fait kicker
 			mysql_user_quit(config, mysql, message->source);
