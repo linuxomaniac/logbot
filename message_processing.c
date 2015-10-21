@@ -1,3 +1,28 @@
+bool get_random_line_file(char *fname, unsigned int maxsize, char **line) {
+	FILE *f;
+	unsigned long lines;
+
+	srand(time(NULL));
+
+	f = fopen(fname, "rb");
+	if(f == NULL) {
+		return false;
+	}
+
+	fseek(f, 0, SEEK_END);
+	lines = ftell(f);
+	
+	fseek(f, rand() % lines, SEEK_SET);
+
+	if(fgets(*line, maxsize, f) != NULL) {
+		if(fgets(*line, maxsize, f) != NULL) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 int privmsg(int sock, char *target, char *message) {
 	char *tpl, *buf;
 	unsigned int len;
@@ -12,12 +37,27 @@ int privmsg(int sock, char *target, char *message) {
 	return t;
 }
 
+int say(int sock, struct CONFIG *config, char *message) {
+	int t;
+	char *buf, *tpl;
+
+	t = privmsg(sock, config->channel, message);
+
+	tpl = "<%s> %s";
+	buf = (char *)malloc(strlen(tpl) + strlen(config->nick) + strlen(message) - 3);
+	sprintf(buf, tpl, config->nick, message);
+	logger(config->logchat, buf);
+	free(buf);	
+
+	return t;
+}
+
 int join(int sock, char *channel) {
 	char *tpl, *buf;
 	unsigned int len;
 	int t;
 
-	tpl = "JOIN %s\r\n";
+	tpl = "JOIN %s\r\n";// 20 JOIN !!!!!!!!!!!!!!
 	len = strlen(tpl) + strlen(channel) - 2;
 	buf = (char *)malloc(len + 1);
 	sprintf(buf, tpl, channel);
@@ -55,6 +95,41 @@ void mysql_user_quit(struct CONFIG *config, MYSQL *mysql, char *source) {
 	}
 }
 
+void react_to_message(int sock, struct CONFIG *config, struct MESSAGE *message) {// On passe la struct message au cas où o nvoufrait utiliser le nom de l'expéditeur
+	if(strstartswith(message->args, "!tgnon")) {
+		say(sock, config, "Au début delthas a dit pourquoi pas, et ensuite il a dit pourquoi pas. Après il a dit après.");
+	} else if(strstartswith(message->args, "!tg")) {
+		say(sock, config, "Il suffit.");
+	} else if(strstartswith(message->args, "!allez")) {
+		say(sock, config, "Je prends la main.");
+	} else if(strstartswith(message->args, "!nomejidésabusé")) {
+		say(sock, config, "Non, mais j'étais véritablement surpris !");
+	} else if(strstartswith(message->args, "!nomejicritique")) {
+		say(sock, config, "cnul");
+	} else if(strstartswith(message->args, "!génial")) {
+		say(sock, config, "Je prends mes affaires !");
+	} else if(strstartswith(message->args, "!emersion")) {
+		say(sock, config, "Quoi encore, delthas ?");
+	} else if(strstartswith(message->args, "!delthas")) {
+		say(sock, config, "pffff");
+	} else if(strstartswith(message->args, "!yves")) {
+		char *line;
+
+		line = (char *)malloc(512);
+		if(get_random_line_file(config->logchat, 512, &line)) {
+			strstrip(line);
+			say(sock, config, line);
+		} else {
+			say(sock, config, "C'est non.");
+		}
+
+		free(line);
+	} else if(strstartswith(message->args, "!help")) {
+		say(sock, config, "Commandes disponibles : !tg, !tgnon, !allez, !yves, !nomejidésabusé, !nomejicritique, !emersion, !delthas, !help.");
+	}
+
+}
+
 bool process_message(int sock, struct CONFIG *config, MYSQL *mysql, struct MESSAGE *message) {
 	char *tpl, *buf, *tmp;
 	unsigned int len;
@@ -74,6 +149,10 @@ bool process_message(int sock, struct CONFIG *config, MYSQL *mysql, struct MESSA
 				free(buf);
 				free(tmp);
 			} else {
+				if(strstartswith(message->args, "!")) {
+					react_to_message(sock, config, message);
+				}
+
 				tpl = "<%s> %s";
 				buf = (char *)malloc(strlen(tpl) + strlen(message->source) + strlen(message->args) - 3);
 				sprintf(buf, tpl, message->source, message->args);
