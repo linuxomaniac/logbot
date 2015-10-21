@@ -298,6 +298,7 @@ bool process_message(int sock, struct CONFIG *config, MYSQL *mysql, struct MESSA
 		free(buf);
 	} else if(strcmp(message->type, "332") == 0) {// Current Topic
 		tmp = strsplit(message->args, ' ');
+		strlstrip(tmp);
 		tpl = "Topic de %s : %s";
 		buf = (char *)malloc(strlen(tpl) + strlen(message->args) + strlen(tmp) - 3);
 		sprintf(buf, tpl, message->args, tmp);

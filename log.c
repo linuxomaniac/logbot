@@ -18,7 +18,7 @@ void logger(char *filename, char *in) {
 	time(&rawtime);
 	info = localtime(&rawtime);
 
-	strftime(date, 12, "%d/%m/%Y %H:%M", info);
+	strftime(date, 17, "%d/%m/%Y %H:%M", info);
 	t = fprintf(f, "[%s] %s\n", date, in);
 
 	fclose(f);
