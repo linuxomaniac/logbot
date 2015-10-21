@@ -1,6 +1,6 @@
 #include "main.h"
 
-// gcc -std=c11 -Wextra -Wall $(mysql_config --cflags) main.c $(mysql_config --libs)
+// gcc -std=c11 -Wextra -o logbot -O3 -Wall $(mysql_config --cflags) main.c $(mysql_config --libs)
 
 int main(int argc, char *argv[]) {
 	struct CONFIG config;
@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	logger(config.logsystem, "LogBot started !");
+	logger(config.logsystem, "LogBot started!");
 
 	if(config.mysqlhost != NULL) {
 		my_mysql_init(&mysql, config);

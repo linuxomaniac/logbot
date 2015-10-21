@@ -1,13 +1,13 @@
 void logger(char *filename, char *in) {
-	FILE *f;
-	char date[12];
-	time_t rawtime;
-	struct tm *info;
-	int t;
-
 	if(filename == NULL) {// Log désactivé
 		return;
 	}
+
+	FILE *f;
+	char date[17];
+	time_t rawtime;
+	struct tm *info;
+	int t;
 
 	f = fopen(filename, "ab");
 	if(f == NULL) {
@@ -18,7 +18,7 @@ void logger(char *filename, char *in) {
 	time(&rawtime);
 	info = localtime(&rawtime);
 
-	strftime(date, 12, "%d/%m %H:%M", info);
+	strftime(date, 12, "%d/%m/%Y %H:%M", info);
 	t = fprintf(f, "[%s] %s\n", date, in);
 
 	fclose(f);
