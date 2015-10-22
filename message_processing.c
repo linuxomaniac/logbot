@@ -149,15 +149,15 @@ bool process_message(int sock, struct CONFIG *config, MYSQL *mysql, struct MESSA
 				free(buf);
 				free(tmp);
 			} else {
-				if(strstartswith(message->args, "!")) {
-					react_to_message(sock, config, message);
-				}
-
 				tpl = "<%s> %s";
 				buf = (char *)malloc(strlen(tpl) + strlen(message->source) + strlen(message->args) - 3);
 				sprintf(buf, tpl, message->source, message->args);
 				logger(config->logchat, buf);
 				free(buf);
+
+				if(strstartswith(message->args, "!")) {
+					react_to_message(sock, config, message);
+				}
 			}
 		} else if(strcasecmp(config->nick, message->target)) {// Message privé
 			if(message->args[0] == '\001') {
