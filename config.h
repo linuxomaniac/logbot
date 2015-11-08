@@ -13,11 +13,21 @@ struct CONFIG {
 	*mysqlhost,
 	*mysqldb,
 	*mysqluser,
-	*mysqlpassword;
+	*mysqlpassword,
+	*aliasrandomline;
+
 	unsigned int port,
 	dccport,
 	dcctimeout,
 	dccalertdelay;
+
+	struct ALIAS *alias;
+};
+
+struct ALIAS {
+	char *trigger,
+	*message;
+	struct ALIAS *next;
 };
 
 unsigned char parse_config(struct CONFIG *config, char *a, char *b);

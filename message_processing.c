@@ -95,24 +95,10 @@ void mysql_user_quit(struct CONFIG *config, MYSQL *mysql, char *source) {
 	}
 }
 
-void react_to_message(int sock, struct CONFIG *config, struct MESSAGE *message) {// On passe la struct message au cas où o nvoufrait utiliser le nom de l'expéditeur
-	if(strstartswith(message->args, "!tgnon")) {
-		say(sock, config, "Au début delthas a dit pourquoi pas, et ensuite il a dit pourquoi pas. Après il a dit après.");
-	} else if(strstartswith(message->args, "!tg")) {
-		say(sock, config, "Il suffit.");
-	} else if(strstartswith(message->args, "!allez")) {
-		say(sock, config, "Je prends la main.");
-	} else if(strstartswith(message->args, "!nomejidésabusé")) {
-		say(sock, config, "Non, mais j'étais véritablement surpris !");
-	} else if(strstartswith(message->args, "!nomejicritique")) {
-		say(sock, config, "cnul");
-	} else if(strstartswith(message->args, "!génial")) {
-		say(sock, config, "Je prends mes affaires !");
-	} else if(strstartswith(message->args, "!emersion")) {
-		say(sock, config, "Quoi encore, delthas ?");
-	} else if(strstartswith(message->args, "!delthas")) {
-		say(sock, config, "pffff");
-	} else if(strstartswith(message->args, "!yves")) {
+void react_to_message(int sock, struct CONFIG *config, struct MESSAGE *message) {// On passe la struct message au cas où on voudrait utiliser le nom de l'expéditeur
+	struct ALIAS *alias;
+
+	if(strcasecmp(message->args, config->aliasrandomline)) {
 		char *line;
 
 		line = (char *)malloc(512);
@@ -124,8 +110,46 @@ void react_to_message(int sock, struct CONFIG *config, struct MESSAGE *message) 
 		}
 
 		free(line);
-	} else if(strstartswith(message->args, "!help")) {
-		say(sock, config, "Commandes disponibles : !tg, !tgnon, !allez, !yves, !nomejidésabusé, !nomejicritique, !emersion, !delthas, !help.");
+	} else if(strcasecmp(message->args, "!help")) {
+		char *buf, *tpl = "Commandes disponibles : !help ";
+		unsigned int len, len2;
+
+		len = strlen(tpl) + 1;// Contient l'octet nul (cnul mdrmdr)
+		len2 = strlen(config->aliasrandomline);
+
+		buf = (char *)malloc(len + len2 + 1);
+		memcpy(buf, tpl, len - 1);
+		buf[len - 1] = ' ';
+		memcpy(buf + len, config->aliasrandomline, len2 + 1);
+		len += len2 + 1;
+
+		if(config->alias != NULL) {
+			alias = config->alias;
+			while(alias != NULL) {
+				len2 = strlen(alias->trigger);
+				buf = realloc(buf, len + len2 + 1);// +1 pour l'espace
+				buf[len - 1] = ' ';// On remplace l'octet nul par un espace
+
+				memcpy(buf + len, alias->trigger, len2 + 1);// On copie l'octet nul
+				len += len2 + 1;
+
+				alias = alias->next;
+			}
+		}
+
+		say(sock, config, buf);
+		free(buf);
+	} else {
+		alias = config->alias;
+
+		while(alias != NULL) {
+			if(strcasecmp(message->args, alias->trigger)) {
+				say(sock, config, alias->message);
+				break;
+			}
+
+			alias = alias->next;
+		}
 	}
 
 }
