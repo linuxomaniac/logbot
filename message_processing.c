@@ -117,11 +117,10 @@ void react_to_message(int sock, struct CONFIG *config, struct MESSAGE *message) 
 		len = strlen(tpl) + 1;// Contient l'octet nul (cnul mdrmdr)
 		len2 = strlen(config->aliasrandomline);
 
-		buf = (char *)malloc(len + len2 + 1);
+		buf = (char *)malloc(len + len2);
 		memcpy(buf, tpl, len - 1);
-		buf[len - 1] = ' ';
-		memcpy(buf + len, config->aliasrandomline, len2 + 1);
-		len += len2 + 1;
+		memcpy(buf + len - 1, config->aliasrandomline, len2 + 1);
+		len += len2;
 
 		if(config->alias != NULL) {
 			alias = config->alias;
